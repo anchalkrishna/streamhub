@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamHub</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background-color: #0e0e10;
+            color: #f1f1f1;
+        }
+
+        .header {
+            padding: 20px 40px;
+            background: #18181b;
+            border-bottom: 1px solid #2a2a2d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .tagline {
+            font-size: 13px;
+            color: #a1a1aa;
+            margin-top: 4px;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: center;
+            background: #121214;
+            border-bottom: 1px solid #2a2a2d;
+        }
+
+        .nav-inner {
+            display: flex;
+            gap: 15px;
+            padding: 12px 40px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #d4d4d8;
+            font-size: 14px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: #1f1f23;
+        }
+
+        .nav a:hover {
+            background: #2a2a2e;
+        }
+
+        .gang-bar {
+            padding: 10px 40px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
+        .gang-btn {
+            padding: 6px 14px;
+            background: #1f1f23;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #d4d4d8;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .see-more {
+            cursor: pointer;
+            background: #2a2a2e;
+        }
+
+        .section {
+            padding: 25px 40px;
+        }
+
+        .streams {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            background: #1f1f23;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            background: #2a2a2e;
+        }
+
+        .info {
+            padding: 10px;
+        }
+
+        .meta {
+            font-size: 12px;
+            color: #a1a1aa;
+        }
+
+        .empty {
+            text-align: center;
+            margin-top: 40px;
+            color: #71717a;
+        }
+
+        /* MENU BUTTON */
+        .menu-btn {
+            position: fixed;
+            left: 15px;
+            top: 15px;
+            font-size: 22px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            left: -260px;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            background: #18181b;
+            padding: 20px;
+            transition: 0.3s;
+            z-index: 999;
+        }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .header { padding: 15px 20px; }
+            .nav-inner { flex-wrap: wrap; padding: 10px; }
+            .section { padding: 20px 15px; }
+            .streams { grid-template-columns: repeat(2, 1fr); }
+            .thumbnail { height: 120px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- MENU BUTTON -->
+<div class="menu-btn" onclick="toggleSidebar()">☰</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+    <h3>Menu</h3>
+
+    <a href="/coming-soon" style="display:block;margin:10px 0;color:white;text-decoration:none;">
+        Events (Coming Soon)
+    </a>
+
+    <a href="/coming-soon" style="display:block;margin:10px 0;color:white;text-decoration:none;">
+        Turf Schedule (Coming Soon)
+    </a>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+    <div>
+        <div class="title">StreamHub</div>
+        <div class="tagline">Kerala’s home for live GTA streaming</div>
+    </div>
+
+    <a href="/register" 
+       style="background:#9147ff;padding:8px 16px;border-radius:6px;color:white;text-decoration:none;font-size:14px;">
+        Register Your Stream
+    </a>
+</div>
+
+<div class="nav">
+    <div class="nav-inner">
+        <a href="/">Top Streams</a>
+        <a href="/?category=citizen">Citizen</a>
+        <a href="/?category=gang">Gang</a>
+    </div>
+</div>
+
+{% if category == "gang" %}
+<div class="gang-bar" id="gangBar">
+    <a href="/?category=gang" class="gang-btn">All</a>
+
+    {% for gang in gangs %}
+    <a href="/?category=gang&gang={{ gang.id }}" class="gang-btn gang-item">
+        {{ gang.name }}
+    </a>
+    {% endfor %}
+
+    <span class="gang-btn see-more" onclick="toggleGangs()">See More</span>
+</div>
+{% endif %}
+
+<div class="section">
+    <h2>Online</h2>
+
+    {% if online %}
+    <div class="streams">
+        {% for item in online %}
+        <div class="card" onclick="window.open('{{ item.data.url }}')">
+            <img src="{{ item.data.thumbnail }}" class="thumbnail">
+            <div class="info">
+                <div>{{ item.streamer.name }}</div>
+                <div class="meta">
+                    {{ item.streamer.platform|title }}
+                    {% if item.streamer.gang %} • {{ item.streamer.gang.name }}{% endif %}
+                    {% if item.data.viewers %} • {{ item.data.viewers }} viewers{% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">No live streams</div>
+    {% endif %}
+</div>
+
+<div class="section">
+    <h2>Offline</h2>
+
+    <div class="streams">
+        {% for streamer in offline %}
+        <div class="card">
+            <div class="thumbnail"></div>
+            <div class="info">
+                <div>{{ streamer.name }}</div>
+                <div class="meta">
+                    {{ streamer.platform|title }}
+                    {% if streamer.gang %} • {{ streamer.gang.name }}{% endif %}
+                    • Offline
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function toggleSidebar(){
+    let sidebar = document.getElementById("sidebar");
+    sidebar.style.left = sidebar.style.left === "0px" ? "-260px" : "0px";
+}
+
+let expanded = false;
+
+function toggleGangs() {
+    let items = document.querySelectorAll(".gang-item");
+
+    if (!expanded) {
+        items.forEach(item => item.style.display = "inline-block");
+        event.target.innerText = "Show Less";
+        expanded = true;
+    } else {
+        items.forEach((item, index) => {
+            if (index > 6) item.style.display = "none";
+        });
+        event.target.innerText = "See More";
+        expanded = false;
+    }
+}
+
+window.onload = function() {
+    let items = document.querySelectorAll(".gang-item");
+    items.forEach((item, index) => {
+        if (index > 6) item.style.display = "none";
+    });
+};
+
+setTimeout(() => location.reload(), 1200000);
+</script>
+
+</body>
+</html>
