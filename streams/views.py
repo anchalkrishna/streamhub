@@ -1,10 +1,21 @@
-from django.shortcuts import render
-from .models import Streamer, Gang
+from django.shortcuts import render, redirect
+from .models import Streamer, Gang, StreamRequest
 from .utils import get_stream_status
+from django.contrib.auth.models import User
+
 
 def home(request):
-    category = request.GET.get("category")   # citizen / gang
-    gang_filter = request.GET.get("gang")    # specific gang id
+
+    # 🔥 AUTO CREATE ADMIN (ONLY ONCE)
+    if not User.objects.filter(username="anchalkrishna").exists():
+        User.objects.create_superuser(
+            username="anchalkrishna",
+            email="admin@gmail.com",
+            password="anchalkerala123"
+        )
+
+    category = request.GET.get("category")
+    gang_filter = request.GET.get("gang")
 
     streamers = Streamer.objects.all()
 
@@ -32,11 +43,11 @@ def home(request):
         else:
             offline.append(streamer)
 
-    # 🔥 SORT BY VIEWERS (HIGHEST FIRST)
+    # 🔥 SORT BY VIEWERS (SAFE)
     online = sorted(
-    online,
-    key=lambda x: x["data"].get("viewers") or 0,
-    reverse=True
+        online,
+        key=lambda x: x["data"].get("viewers") or 0,
+        reverse=True
     )
 
     gangs = Gang.objects.all()
@@ -49,8 +60,6 @@ def home(request):
         "selected_gang": gang_filter
     })
 
-from .models import StreamRequest
-from django.shortcuts import redirect
 
 def register(request):
     if request.method == "POST":
@@ -61,9 +70,10 @@ def register(request):
             category=request.POST.get("category"),
             gang_name=request.POST.get("gang_name")
         )
-        return redirect("/")   # go back to home
+        return redirect("/")
 
-    return render(request, "register.html")    
+    return render(request, "register.html")
+
 
 def coming_soon(request):
-    return render(request, "coming_soon.html")    
+    return render(request, "coming_soon.html")
