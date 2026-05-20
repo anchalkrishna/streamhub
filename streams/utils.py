@@ -3,31 +3,27 @@ import requests
 
 # 🔥 KICK FUNCTION (UNCHANGED)
 def check_kick_live(username):
-    url = f"https://kick.com/api/v2/channels/{username}"
-
     try:
-        response = requests.get(url)
+        url = f"https://kick.com/api/v2/channels/{username}"
+
+        response = requests.get(url, timeout=5)
         data = response.json()
 
         livestream = data.get("livestream")
-        user = data.get("user", {})
+        playback = data.get("playback_url")
 
-        profile_pic = user.get("profile_pic")
-
+        # 🔥 CORRECT LOGIC
         if livestream:
             return {
                 "is_live": True,
                 "title": livestream.get("session_title"),
-                "viewers": livestream.get("viewer_count"),
-                "thumbnail": profile_pic,
+                "viewers": livestream.get("viewer_count") or 0,
+                "thumbnail": data.get("user", {}).get("profile_pic"),
                 "url": f"https://kick.com/{username}"
             }
 
-        else:
-            return {
-                "is_live": False,
-                "thumbnail": profile_pic
-            }
+        # playback exists but no livestream → NOT LIVE
+        return {"is_live": False}
 
     except Exception as e:
         print("Kick Error:", e)
