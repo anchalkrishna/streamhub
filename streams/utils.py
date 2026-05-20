@@ -41,28 +41,31 @@ def check_youtube_live_scrape(username):
         url = f"https://www.youtube.com/@{username}/live"
 
         headers = {
-            "User-Agent": "Mozilla/5.0"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+            "Accept-Language": "en-US,en;q=0.9",
         }
 
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=5)
         html = response.text
 
-        # 🔍 Try to find video ID from embedded JSON
-        video_match = re.search(r'"videoId":"(.*?)"', html)
+        # 🔴 QUICK CHECK (MOST IMPORTANT)
+        if '"isLiveNow":true' not in html and '"isLive":true' not in html:
+            return {"is_live": False}
 
-        if video_match:
-            video_id = video_match.group(1)
+        # 🔍 Extract video ID (more reliable)
+        matches = re.findall(r'"videoId":"(.*?)"', html)
 
-            # 🔍 Check if it's actually live
-            if '"isLiveNow":true' in html or '"isLive":true' in html:
+        if matches:
+            video_id = matches[0]
 
-                return {
-                    "is_live": True,
-                    "title": "Live Now",
-                    "thumbnail": f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg",
-                    "viewers": None,
-                    "url": f"https://www.youtube.com/watch?v={video_id}"
-                }
+            return {
+                "is_live": True,
+                "title": "Live Now",
+                "thumbnail": f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg",
+                "viewers": 0,
+                # 🔥 IMPORTANT CHANGE
+                "url": f"https://www.youtube.com/@{username}/live"
+            }
 
         return {"is_live": False}
 
