@@ -61,7 +61,7 @@ def check_youtube_live_scrape(username):
             return {
                 "is_live": True,
                 "title": "Live Now",
-                "thumbnail": f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg",
+                "thumbnail": f"https://unavatar.io/youtube/{username}",
                 "viewers": 0,
                 # 🔥 IMPORTANT CHANGE
                 "url": f"https://www.youtube.com/@{username}/live"
