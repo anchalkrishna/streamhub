@@ -10,10 +10,9 @@ def check_kick_live(username):
         data = response.json()
 
         livestream = data.get("livestream")
-        playback = data.get("playback_url")
 
-        # 🔥 CORRECT LOGIC
-        if livestream:
+        # 🔥 STRICT CHECK
+        if livestream and livestream.get("session_title"):
             return {
                 "is_live": True,
                 "title": livestream.get("session_title"),
@@ -22,7 +21,6 @@ def check_kick_live(username):
                 "url": f"https://kick.com/{username}"
             }
 
-        # playback exists but no livestream → NOT LIVE
         return {"is_live": False}
 
     except Exception as e:
