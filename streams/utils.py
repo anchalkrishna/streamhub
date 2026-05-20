@@ -34,7 +34,6 @@ def check_kick_live(username):
         return {"is_live": False}
 
 
-# 🔥 YOUTUBE SCRAPING FUNCTION (NEW)
 def check_youtube_live_scrape(username):
     try:
         import re
