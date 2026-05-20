@@ -6,16 +6,29 @@ def check_kick_live(username):
     try:
         url = f"https://kick.com/api/v2/channels/{username}"
 
-        response = requests.get(url, timeout=5)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Accept": "application/json, text/plain, */*",
+            "Referer": f"https://kick.com/{username}",
+            "Origin": "https://kick.com",
+            "Connection": "keep-alive"
+        }
+
+        response = requests.get(url, headers=headers, timeout=5)
+
+        # 🔥 IMPORTANT: check status
+        if response.status_code != 200:
+            print("Kick API blocked:", response.status_code)
+            return {"is_live": False}
+
         data = response.json()
 
         livestream = data.get("livestream")
 
-        # 🔥 STRICT CHECK
-        if livestream and livestream.get("session_title"):
+        if livestream:
             return {
                 "is_live": True,
-                "title": livestream.get("session_title"),
+                "title": livestream.get("session_title", "Live Now"),
                 "viewers": livestream.get("viewer_count") or 0,
                 "thumbnail": data.get("user", {}).get("profile_pic"),
                 "url": f"https://kick.com/{username}"
